@@ -1,0 +1,116 @@
+.customizer {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1200;
+  display: flex;
+}
+
+.customizer-toggler {
+  position: relative;
+  cursor: pointer;
+  padding: 0.5rem;
+  background-color: var(--mui-palette-primary-main);
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  box-shadow: var(--mui-customShadows-sm);
+}
+
+.customizer-toggler i {
+  font-size: 1.375rem;
+  color: var(--mui-palette-common-white);
+  animation: spin 2s linear infinite;
+}
+
+.customizer-content {
+  width: 360px;
+  height: 100vh;
+  background-color: var(--mui-palette-background-paper);
+  position: fixed;
+  right: -360px;
+  top: 0;
+  transition: right 0.25s ease-in-out;
+  box-shadow: var(--mui-customShadows-lg);
+}
+
+.customizer.open .customizer-content {
+  right: 0;
+}
+
+.customizer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--mui-palette-divider);
+}
+
+.customizer-body {
+  height: calc(100% - 4rem);
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.customizer-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customizer-body::-webkit-scrollbar-thumb {
+  background-color: var(--mui-palette-primary-main);
+  border-radius: 6px;
+}
+
+.customizer-section {
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--mui-palette-divider);
+}
+
+.customizer-section:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* Options Styles */
+.skin-option,
+.mode-option,
+.layout-option,
+.content-width-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--mui-palette-divider);
+  transition: all 0.25s ease-in-out;
+}
+
+.skin-option:hover,
+.mode-option:hover,
+.layout-option:hover,
+.content-width-option:hover {
+  border-color: var(--mui-palette-primary-main);
+  background-color: var(--mui-palette-action-hover);
+}
+
+.skin-option.active,
+.mode-option.active,
+.layout-option.active,
+.content-width-option.active {
+  border-color: var(--mui-palette-primary-main);
+  background-color: var(--mui-palette-primary-main);
+  color: var(--mui-palette-common-white);
+}
+
+/* Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} 

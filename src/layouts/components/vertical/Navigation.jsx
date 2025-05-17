@@ -12,26 +12,36 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import PushPinIcon from '@mui/icons-material/PushPin';
+
+// Hook Imports
+import useNavigation from '../../../hooks/useNavigation';
+import { useLayoutContext } from '../../../components/layout/LayoutContext';
 
 const drawerWidth = 260;
+const collapsedWidth = 85;
 
-const StyledDrawer = styled(Drawer)(({ theme }) => ({
+const StyledDrawer = styled(Drawer)(({ theme, navStyle }) => ({
   width: drawerWidth,
   flexShrink: 0,
+  whiteSpace: 'nowrap',
+  boxSizing: 'border-box',
   '& .MuiDrawer-paper': {
     width: drawerWidth,
-    boxSizing: 'border-box',
-    backgroundColor: theme.palette.background.paper,
-    borderRight: `1px solid ${theme.palette.divider}`,
-    transition: theme.transitions.create(['box-shadow', 'width'], {
+    transition: theme.transitions.create(['width', 'box-shadow'], {
       duration: theme.transitions.duration.shorter
     }),
-    boxShadow: theme.shadows[4],
+    boxShadow: navStyle === 'floating' ? theme.shadows[4] : 'none',
     overflowX: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+    borderRight: `1px solid ${theme.palette.divider}`,
     [theme.breakpoints.down('lg')]: {
       position: 'fixed'
     }
@@ -60,10 +70,24 @@ const Navigation = ({ open, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
+  const {
+    isCollapsed,
+    isHovered,
+    isBreakpointReached,
+    isPinned,
+    toggleCollapse,
+    togglePin,
+    handleMouseEnter,
+    handleMouseLeave
+  } = useNavigation();
+
+  const { navStyle } = useLayoutContext();
 
   const handleNavigation = (path) => {
     navigate(path);
-    if (onClose) onClose();
+    if (isBreakpointReached) {
+      onClose();
+    }
   };
 
   const handleLogout = () => {
@@ -71,14 +95,48 @@ const Navigation = ({ open, onClose }) => {
     navigate('/login');
   };
 
+  const effectiveWidth = isCollapsed && !isHovered ? collapsedWidth : drawerWidth;
+
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 6 }}>
-        <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
+    <Box 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column'
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Box sx={{ 
+        p: 6, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        minHeight: 64
+      }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            color: 'primary.main', 
+            fontWeight: 600,
+            opacity: isCollapsed && !isHovered ? 0 : 1,
+            transition: theme => theme.transitions.create('opacity')
+          }}
+        >
           React Dashboard
         </Typography>
+        {!isBreakpointReached && (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton onClick={togglePin} sx={{ color: isPinned ? 'primary.main' : 'text.secondary' }}>
+              <PushPinIcon sx={{ transform: isPinned ? 'none' : 'rotate(45deg)' }} />
+            </IconButton>
+            <IconButton onClick={toggleCollapse}>
+              {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </Box>
+        )}
       </Box>
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
         <List component="nav" sx={{ px: 2 }}>
           {menuItems.map((item) => (
             <ListItem key={item.title} disablePadding sx={{ mb: 1 }}>
@@ -87,6 +145,8 @@ const Navigation = ({ open, onClose }) => {
                   py: 2.5,
                   px: 4,
                   borderRadius: 1,
+                  minHeight: 48,
+                  justifyContent: isCollapsed && !isHovered ? 'center' : 'flex-start',
                   '&.active': {
                     backgroundColor: theme.palette.primary.main + '14',
                     '& .MuiListItemIcon-root, & .MuiTypography-root': {
@@ -103,7 +163,9 @@ const Navigation = ({ open, onClose }) => {
               >
                 <ListItemIcon 
                   sx={{ 
-                    minWidth: 38,
+                    minWidth: isCollapsed && !isHovered ? 0 : 38,
+                    mr: isCollapsed && !isHovered ? 0 : 3,
+                    justifyContent: 'center',
                     color: location.pathname === item.path ? 'primary.main' : 'text.secondary'
                   }}
                 >
@@ -111,6 +173,10 @@ const Navigation = ({ open, onClose }) => {
                 </ListItemIcon>
                 <ListItemText
                   primary={item.title}
+                  sx={{
+                    opacity: isCollapsed && !isHovered ? 0 : 1,
+                    transition: theme => theme.transitions.create('opacity')
+                  }}
                   primaryTypographyProps={{
                     noWrap: true,
                     fontSize: '0.875rem',
@@ -130,6 +196,8 @@ const Navigation = ({ open, onClose }) => {
               py: 2.5,
               px: 4,
               borderRadius: 1,
+              minHeight: 48,
+              justifyContent: isCollapsed && !isHovered ? 'center' : 'flex-start',
               color: 'error.main',
               '&:hover': {
                 backgroundColor: theme => theme.palette.error.main + '14'
@@ -137,11 +205,22 @@ const Navigation = ({ open, onClose }) => {
             }}
             onClick={handleLogout}
           >
-            <ListItemIcon sx={{ minWidth: 38, color: 'error.main' }}>
+            <ListItemIcon 
+              sx={{ 
+                minWidth: isCollapsed && !isHovered ? 0 : 38,
+                mr: isCollapsed && !isHovered ? 0 : 3,
+                justifyContent: 'center',
+                color: 'error.main'
+              }}
+            >
               <LogoutIcon />
             </ListItemIcon>
             <ListItemText
               primary="Logout"
+              sx={{
+                opacity: isCollapsed && !isHovered ? 0 : 1,
+                transition: theme => theme.transitions.create('opacity')
+              }}
               primaryTypographyProps={{
                 noWrap: true,
                 fontSize: '0.875rem',
@@ -160,7 +239,8 @@ const Navigation = ({ open, onClose }) => {
       sx={{
         flexShrink: 0,
         [theme.breakpoints.up('lg')]: {
-          width: drawerWidth
+          width: effectiveWidth,
+          transition: theme.transitions.create('width')
         }
       }}
     >
@@ -185,9 +265,15 @@ const Navigation = ({ open, onClose }) => {
       </Drawer>
       {/* Desktop navigation drawer */}
       <StyledDrawer
-        variant="permanent"
+        variant={navStyle === 'floating' ? 'permanent' : 'persistent'}
+        navStyle={navStyle}
         sx={{
-          display: { xs: 'none', lg: 'block' }
+          display: { xs: 'none', lg: 'block' },
+          '& .MuiDrawer-paper': {
+            width: effectiveWidth,
+            transform: 'none',
+            visibility: 'visible'
+          }
         }}
       >
         {drawer}

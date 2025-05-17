@@ -32,6 +32,14 @@ const IconWrapper = styled(Box)(({ theme, color }) => ({
   color: theme.palette[color].main
 }));
 
+const DashboardWrapper = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(6),
+  marginTop: 64, // Height of the navbar
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(4)
+  }
+}));
+
 const statsData = [
   {
     title: 'Total Sales',
@@ -61,57 +69,13 @@ const statsData = [
 
 const Dashboard = () => {
   return (
-    <Box sx={{ p: 5 }}>
-      <Typography variant="h4" sx={{ mb: 5 }}>
+    <Box sx={{ p: 6 }}>
+      <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
-      <Grid container spacing={4}>
-        {statsData.map((item) => (
-          <Grid item xs={12} sm={6} md={3} key={item.title}>
-            <StyledCard>
-              <Box>
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  {item.title}
-                </Typography>
-                <Typography variant="h5" sx={{ mb: 1 }}>
-                  {item.stats}
-                </Typography>
-              </Box>
-              <IconWrapper color={item.color}>{item.icon}</IconWrapper>
-            </StyledCard>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Add more dashboard content here */}
-      <Grid container spacing={4} sx={{ mt: 4 }}>
-        <Grid item xs={12} md={8}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Recent Activity
-              </Typography>
-              {/* Add chart or activity list here */}
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography color="textSecondary">Chart or activity list goes here</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Statistics
-              </Typography>
-              {/* Add statistics or summary here */}
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography color="textSecondary">Statistics summary goes here</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <Typography variant="body1">
+        Welcome to your dashboard!
+      </Typography>
     </Box>
   );
 };

@@ -8,14 +8,34 @@ import { styled } from '@mui/material/styles';
 
 // Component Imports
 import LayoutContent from './components/vertical/LayoutContent';
+import ScrollToTop from '../components/scroll-to-top/ScrollToTop';
+import ThemeCustomizer from '../components/theme/ThemeCustomizer';
 
-const StyledContentWrapper = styled('div')(({ theme }) => ({
+// Context Import
+import { useLayoutContext } from '../components/layout/LayoutContext';
+
+const StyledContentWrapper = styled('div')(({ theme, layoutWidth, navStyle }) => ({
   minHeight: '100vh',
   display: 'flex',
   flexDirection: 'column',
+  transition: theme.transitions.create(['margin', 'max-width'], {
+    duration: theme.transitions.duration.shorter
+  }),
   [theme.breakpoints.up('lg')]: {
-    marginLeft: 260 // drawer width
+    marginLeft: navStyle === 'floating' ? 260 : 0,
+    maxWidth: layoutWidth === 'boxed' ? '1440px' : '100%',
+    margin: layoutWidth === 'boxed' ? '0 auto' : undefined
   }
+}));
+
+const MainWrapper = styled(Box)(({ theme, layoutWidth }) => ({
+  display: 'flex',
+  minHeight: '100vh',
+  overflow: 'hidden',
+  maxWidth: layoutWidth === 'boxed' ? '1440px' : '100%',
+  margin: layoutWidth === 'boxed' ? '0 auto' : undefined,
+  position: 'relative',
+  backgroundColor: theme.palette.background.default
 }));
 
 const verticalLayoutClasses = {
@@ -30,21 +50,33 @@ const VerticalLayout = props => {
   // States
   const [isNavOpen, setIsNavOpen] = useState(false);
 
+  // Context
+  const { navStyle, layoutWidth, navCollapsed } = useLayoutContext();
+
   const handleNavToggle = () => {
     setIsNavOpen(!isNavOpen);
   };
 
   return (
-    <Box className={classnames(verticalLayoutClasses.root)}>
-      {navigation && React.cloneElement(navigation, { open: isNavOpen, onClose: () => setIsNavOpen(false) })}
+    <MainWrapper className={classnames(verticalLayoutClasses.root)} layoutWidth={layoutWidth}>
+      {navigation && React.cloneElement(navigation, { 
+        open: isNavOpen, 
+        onClose: () => setIsNavOpen(false),
+        navStyle,
+        navCollapsed
+      })}
       <StyledContentWrapper
         className={classnames(verticalLayoutClasses.contentWrapper)}
+        layoutWidth={layoutWidth}
+        navStyle={navStyle}
       >
         {navbar && React.cloneElement(navbar, { onDrawerToggle: handleNavToggle })}
         <LayoutContent>{children}</LayoutContent>
         {footer || null}
       </StyledContentWrapper>
-    </Box>
+      <ScrollToTop />
+      <ThemeCustomizer />
+    </MainWrapper>
   );
 };
 
